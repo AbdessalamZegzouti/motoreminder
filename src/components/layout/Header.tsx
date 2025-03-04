@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +24,9 @@ type HeaderProps = {
 };
 
 const Header = ({ title, userRole = 'agency', username = 'أحمد محمد' }: HeaderProps) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -36,6 +42,11 @@ const Header = ({ title, userRole = 'agency', username = 'أحمد محمد' }: 
       case 'super-admin': return 'مشرف النظام';
       default: return 'مستخدم';
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -94,7 +105,7 @@ const Header = ({ title, userRole = 'agency', username = 'أحمد محمد' }: 
                 </DropdownMenuItem>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer justify-center text-center text-primary">
+              <DropdownMenuItem className="cursor-pointer justify-center text-center text-primary" onClick={() => navigate('/notifications')}>
                 عرض كل الإشعارات
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -118,10 +129,10 @@ const Header = ({ title, userRole = 'agency', username = 'أحمد محمد' }: 
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
-              <DropdownMenuItem>الإعدادات</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>الملف الشخصي</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>الإعدادات</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">تسجيل الخروج</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>تسجيل الخروج</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

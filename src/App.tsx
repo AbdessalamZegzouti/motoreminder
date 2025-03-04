@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/settings/Settings";
 import NotFound from "./pages/NotFound";
 
 // Layout
@@ -78,11 +78,12 @@ const AppRoutes = () => {
       {/* Protected Routes */}
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="dashboard" element={<Dashboard />} />
+        {/* Settings page */}
+        <Route path="settings" element={<Settings />} />
         {/* Add more routes for other pages */}
         <Route path="clients" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة العملاء - قيد التطوير</div>} />
         <Route path="payments" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة المدفوعات - قيد التطوير</div>} />
         <Route path="reminders" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة التذكيرات - قيد التطوير</div>} />
-        <Route path="settings" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة الإعدادات - قيد التطوير</div>} />
         <Route path="logout" element={<div className="min-h-[40vh] flex items-center justify-center">جاري تسجيل الخروج...</div>} />
         
         {/* Super Admin Routes */}
