@@ -12,6 +12,7 @@ import Register from "./pages/auth/Register";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/settings/Settings";
 import NotFound from "./pages/NotFound";
+import Reminders from "./pages/Reminders";
 
 // Layout
 import AppLayout from "./components/layout/AppLayout";
@@ -83,7 +84,7 @@ const AppRoutes = () => {
         {/* Add more routes for other pages */}
         <Route path="clients" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة العملاء - قيد التطوير</div>} />
         <Route path="payments" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة المدفوعات - قيد التطوير</div>} />
-        <Route path="reminders" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة التذكيرات - قيد التطوير</div>} />
+        <Route path="reminders" element={<Reminders />} />
         <Route path="logout" element={<div className="min-h-[40vh] flex items-center justify-center">جاري تسجيل الخروج...</div>} />
         
         {/* Super Admin Routes */}
