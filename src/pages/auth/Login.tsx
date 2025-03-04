@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 import AuthLayout from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,24 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check if redirected from another page
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +38,10 @@ const Login = () => {
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك في منصة موتوبي",
       });
-      navigate('/dashboard');
+      // Navigate to dashboard or original destination
+      navigate(from, { replace: true });
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "فشل تسجيل الدخول",

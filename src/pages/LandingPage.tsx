@@ -1,8 +1,8 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/AuthContext';
 import { 
   CreditCard, 
   MessageCircle, 
@@ -14,6 +14,17 @@ import {
 } from 'lucide-react';
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartNow = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
@@ -38,12 +49,20 @@ const LandingPage = () => {
           </nav>
           
           <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="ghost">تسجيل الدخول</Button>
-            </Link>
-            <Link to="/register">
-              <Button>سجل الآن</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Button onClick={() => navigate('/dashboard')}>
+                لوحة التحكم
+              </Button>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost">تسجيل الدخول</Button>
+                </Link>
+                <Link to="/register">
+                  <Button>سجل الآن</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -62,12 +81,10 @@ const LandingPage = () => {
               منصة موتوبي توفر لوكالات الدراجات النارية نظام سهل ومتكامل لإدارة مدفوعات العملاء وتذكيرهم بالمواعيد عبر واتساب
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register">
-                <Button size="lg" className="w-full sm:w-auto">
-                  ابدأ الآن مجاناً
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <Button size="lg" className="w-full sm:w-auto" onClick={handleStartNow}>
+                ابدأ الآن مجاناً
+                <ArrowLeft className="mr-2 h-4 w-4" />
+              </Button>
               <Link to="#features">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   استكشف المميزات
@@ -205,7 +222,7 @@ const LandingPage = () => {
                     <span>دعم فني</span>
                   </li>
                 </ul>
-                <Button className="w-full">
+                <Button className="w-full" onClick={handleStartNow}>
                   ابدأ الآن
                   <ChevronLeft className="mr-2 h-4 w-4" />
                 </Button>
@@ -252,7 +269,7 @@ const LandingPage = () => {
                     <span>تقارير متقدمة</span>
                   </li>
                 </ul>
-                <Button className="w-full">
+                <Button className="w-full" onClick={handleStartNow}>
                   ابدأ الآن
                   <ChevronLeft className="mr-2 h-4 w-4" />
                 </Button>
@@ -355,6 +372,58 @@ const LandingPage = () => {
               <p className="text-muted-foreground">
                 نعم، يمكنك الترقية أو تغيير خطة الاشتراك في أي وقت. عند الترقية، سيتم احتساب المبلغ المتبقي من اشتراكك الحالي.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Additional Contact Section */}
+      <section id="contact" className="py-20">
+        <div className="container">
+          <div className="text-center max-w-[800px] mx-auto mb-16 animate-fade-in">
+            <h2 className="text-3xl font-bold mb-4">تواصل معنا</h2>
+            <p className="text-xl text-muted-foreground">
+              نحن هنا للإجابة على جميع استفساراتك
+            </p>
+          </div>
+          
+          <div className="bg-background rounded-xl p-8 border shadow-sm max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4">معلومات الاتصال</h3>
+                <div className="space-y-4">
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">البريد الإلكتروني:</span> 
+                    <a href="mailto:info@motopay.com" className="text-primary hover:underline">info@motopay.com</a>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">الهاتف:</span> 
+                    <a href="tel:+966501234567" className="text-primary hover:underline ltr">+966 50 123 4567</a>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">العنوان:</span> 
+                    <span>الرياض، المملكة العربية السعودية</span>
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold mb-4">ساعات العمل</h3>
+                <div className="space-y-2">
+                  <p className="flex justify-between">
+                    <span>الأحد - الخميس</span>
+                    <span className="ltr">9:00 AM - 5:00 PM</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span>الجمعة</span>
+                    <span className="ltr">مغلق</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span>السبت</span>
+                    <span className="ltr">10:00 AM - 2:00 PM</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

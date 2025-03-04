@@ -1,18 +1,33 @@
 
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import Header from './Header';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 type AppLayoutProps = {
   title?: string;
 };
 
 const AppLayout = ({ title = 'الرئيسية' }: AppLayoutProps) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const userRole = user?.role || 'agency';
+
+  // Effect to redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      // Welcome toast when entering dashboard
+      toast({
+        title: `مرحباً بك ${user?.name}`,
+        description: "تم تسجيل الدخول بنجاح إلى لوحة التحكم",
+      });
+    }
+  }, [isAuthenticated, navigate, user]);
 
   return (
     <div className="flex h-screen bg-background">

@@ -169,8 +169,12 @@ const Dashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{adminStats.totalAgencies}</div>
               <div className="flex items-center gap-1 mt-1">
-                <Badge variant="outline" className="text-xs">نشط: {adminStats.activeAgencies}</Badge>
-                <Badge variant="outline" className="text-xs">معلق: {adminStats.pendingAgencies}</Badge>
+                <span className="text-xs text-muted-foreground">
+                  نشط: <Badge variant="outline" className="text-xs">{adminStats.activeAgencies}</Badge>
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  معلق: <Badge variant="outline" className="text-xs">{adminStats.pendingAgencies}</Badge>
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -324,9 +328,7 @@ const Dashboard = () => {
                   <div key={agency.id} className="flex flex-col border rounded-lg p-4 hover-scale">
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="font-semibold">{agency.name}</h3>
-                      <Badge 
-                        variant={agency.status === 'نشط' ? 'outline' : 'destructive'}
-                      >
+                      <Badge variant={agency.status === 'نشط' ? 'outline' : 'destructive'}>
                         {agency.status}
                       </Badge>
                     </div>

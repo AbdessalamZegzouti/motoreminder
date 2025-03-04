@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Pages
@@ -15,19 +15,28 @@ import NotFound from "./pages/NotFound";
 
 // Layout
 import AppLayout from "./components/layout/AppLayout";
+import { useEffect } from "react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+    },
+  },
+});
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
   }
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // Pass the current location to redirect back after login
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
   return children;
@@ -49,6 +58,16 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 const AppRoutes = () => {
+  const { logout } = useAuth();
+  const location = useLocation();
+  
+  // Handle logout route
+  useEffect(() => {
+    if (location.pathname === '/logout') {
+      logout();
+    }
+  }, [location.pathname, logout]);
+
   return (
     <Routes>
       {/* Public Routes */}
