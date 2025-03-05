@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -37,19 +36,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Check for existing session on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
         
-        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) throw sessionError;
         
         if (session) {
-          // Get user profile from profiles table
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*, agencies(name)')
@@ -58,7 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (profileError) throw profileError;
           
-          // Format user data
           const userData: User = {
             id: session.user.id,
             email: session.user.email || '',
@@ -77,10 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Set up auth state listener for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        // Get user profile when signed in
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*, agencies(name)')
@@ -106,7 +99,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     checkAuth();
 
-    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
@@ -124,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.message || 'بيانات الدخول غير صحيحة');
+      throw new Error(error.message || 'بيانات الدخول غير ��حيحة');
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +125,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (agencyName: string, name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Register user
       const { data: { user: authUser }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -148,21 +139,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (signUpError) throw signUpError;
       
       if (authUser) {
-        // Create agency
+        const subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        
         const { data: agency, error: agencyError } = await supabase
           .from('agencies')
           .insert({
             name: agencyName,
             owner_id: authUser.id,
             subscription_status: 'active',
-            subscription_ends: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+            subscription_ends: subscriptionEndDate.toISOString()
           })
           .select()
           .single();
         
         if (agencyError) throw agencyError;
         
-        // Update profile with agency_id
         if (agency) {
           const { error: profileUpdateError } = await supabase
             .from('profiles')
@@ -173,7 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (profileUpdateError) throw profileUpdateError;
           
-          // Create default settings for agency
           const { error: settingsError } = await supabase
             .from('settings')
             .insert({
