@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,11 @@ import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/settings/Settings";
 import NotFound from "./pages/NotFound";
 import Reminders from "./pages/Reminders";
+import Clients from "./pages/Clients";
+import Payments from "./pages/Payments";
+import Agencies from "./pages/Agencies";
+import Subscriptions from "./pages/Subscriptions";
+import Statistics from "./pages/Statistics";
 
 // Layout
 import AppLayout from "./components/layout/AppLayout";
@@ -79,18 +85,14 @@ const AppRoutes = () => {
       {/* Protected Routes */}
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="dashboard" element={<Dashboard />} />
-        {/* Settings page */}
         <Route path="settings" element={<Settings />} />
-        {/* Add more routes for other pages */}
-        <Route path="clients" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة العملاء - قيد التطوير</div>} />
-        <Route path="payments" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة المدفوعات - قيد التطوير</div>} />
+        <Route path="clients" element={<Clients />} />
+        <Route path="payments" element={<Payments />} />
         <Route path="reminders" element={<Reminders />} />
+        <Route path="agencies" element={<Agencies />} />
+        <Route path="subscriptions" element={<Subscriptions />} />
+        <Route path="statistics" element={<Statistics />} />
         <Route path="logout" element={<div className="min-h-[40vh] flex items-center justify-center">جاري تسجيل الخروج...</div>} />
-        
-        {/* Super Admin Routes */}
-        <Route path="agencies" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة الوكالات - قيد التطوير</div>} />
-        <Route path="subscriptions" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة الاشتراكات - قيد التطوير</div>} />
-        <Route path="statistics" element={<div className="min-h-[40vh] flex items-center justify-center">صفحة الإحصائيات - قيد التطوير</div>} />
       </Route>
       
       {/* Catch All */}
