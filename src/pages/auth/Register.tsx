@@ -6,6 +6,7 @@ import AuthLayout from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { User, Mail, Eye, EyeOff, UserPlus, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Register = () => {
@@ -19,6 +20,8 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,81 +57,135 @@ const Register = () => {
 
   return (
     <AuthLayout>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="mb-6">
+        <div className="h-16 w-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+          <UserPlus className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-2xl font-bold text-center">إنشاء حساب جديد</h2>
+        <p className="text-muted-foreground text-center mt-2">أدخل بياناتك لإنشاء حساب في منصة موتوبي</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="agencyName">اسم الوكالة</Label>
-            <Input
-              id="agencyName"
-              type="text"
-              placeholder="اسم وكالتك"
-              value={agencyName}
-              onChange={(e) => setAgencyName(e.target.value)}
-              required
-            />
+            <Label htmlFor="agencyName" className="text-base">اسم الوكالة</Label>
+            <div className="relative">
+              <Input
+                id="agencyName"
+                type="text"
+                placeholder="اسم وكالتك"
+                value={agencyName}
+                onChange={(e) => setAgencyName(e.target.value)}
+                required
+                className="pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+              />
+              <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="name">اسم المدير</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="اسمك الكامل"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Label htmlFor="name" className="text-base">اسم المدير</Label>
+            <div className="relative">
+              <Input
+                id="name"
+                type="text"
+                placeholder="اسمك الكامل"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+              />
+              <User className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="ltr text-left"
-            />
+            <Label htmlFor="email" className="text-base">البريد الإلكتروني</Label>
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="ltr text-left pl-10 pr-4 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+              />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password">كلمة المرور</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="ltr text-left"
-            />
+            <Label htmlFor="password" className="text-base">كلمة المرور</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="ltr text-left pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? 
+                  <EyeOff className="h-5 w-5" /> : 
+                  <Eye className="h-5 w-5" />
+                }
+              </button>
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="ltr text-left"
-            />
+            <Label htmlFor="confirmPassword" className="text-base">تأكيد كلمة المرور</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="ltr text-left pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showConfirmPassword ? 
+                  <EyeOff className="h-5 w-5" /> : 
+                  <Eye className="h-5 w-5" />
+                }
+              </button>
+            </div>
           </div>
         </div>
         
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+        <Button 
+          type="submit" 
+          className="w-full relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] h-11 mt-2"
+          disabled={isLoading}
+        >
+          {isLoading ? "جاري إنشاء الحساب..." : (
+            <>
+              إنشاء حساب
+              <UserPlus className="mr-2 h-4 w-4" />
+            </>
+          )}
         </Button>
         
-        <div className="text-center text-sm">
-          لديك حساب بالفعل؟{" "}
-          <Link to="/login" className="text-primary hover:underline">
-            تسجيل الدخول
-          </Link>
+        <div className="text-center mt-4">
+          <div className="text-sm">
+            لديك حساب بالفعل؟{" "}
+            <Link to="/login" className="text-primary font-medium hover:underline transition-colors">
+              تسجيل الدخول
+            </Link>
+          </div>
         </div>
       </form>
     </AuthLayout>
