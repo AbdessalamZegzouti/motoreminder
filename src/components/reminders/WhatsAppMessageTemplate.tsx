@@ -12,7 +12,7 @@ interface WhatsAppMessageTemplateProps {
   onTemplateChange: (template: string) => void;
 }
 
-const DEFAULT_TEMPLATE = 'مرحباً {{clientName}}،\nنذكركم بموعد دفع المبلغ المستحق {{amountDue}} ريال.\nشكراً لتعاونكم.';
+const DEFAULT_TEMPLATE = 'مرحباً {{clientName}}،\nنذكركم بموعد دفع المبلغ المستحق {{amountDue}} درهم.\nشكراً لتعاونكم.';
 
 const WhatsAppMessageTemplate: React.FC<WhatsAppMessageTemplateProps> = ({
   template,
