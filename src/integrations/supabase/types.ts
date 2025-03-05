@@ -9,7 +9,259 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      agencies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          subscription_ends: string | null
+          subscription_status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          subscription_ends?: string | null
+          subscription_status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          subscription_ends?: string | null
+          subscription_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          agency_id: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          agency_id: string
+          amount: number
+          client_id: string
+          created_at: string
+          currency: string | null
+          due_date: string | null
+          id: string
+          paid_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          amount: number
+          client_id: string
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          paid_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          amount?: number
+          client_id?: string
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          paid_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          id: string
+          name: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          id: string
+          name?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          agency_id: string
+          client_id: string
+          created_at: string
+          id: string
+          message: string
+          payment_id: string | null
+          send_date: string | null
+          sent_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          message: string
+          payment_id?: string | null
+          send_date?: string | null
+          sent_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          payment_id?: string | null
+          send_date?: string | null
+          sent_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          whatsapp_template: string | null
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          whatsapp_template?: string | null
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          whatsapp_template?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settings_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 type UserRole = 'agency' | 'admin' | 'super-admin';
 
@@ -35,13 +37,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Simulate checking for existing session
+  // Check for existing session on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const storedUser = localStorage.getItem('motoUser');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        setIsLoading(true);
+        
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
+        
+        if (session) {
+          // Get user profile from profiles table
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*, agencies(name)')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profileError) throw profileError;
+          
+          // Format user data
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: profile.name || '',
+            role: profile.role as UserRole,
+            agencyId: profile.agency_id || undefined,
+            agencyName: profile.agencies ? profile.agencies.name : undefined
+          };
+          
+          setUser(userData);
         }
       } catch (error) {
         console.error('Authentication error:', error);
@@ -50,43 +77,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    // Set up auth state listener for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Get user profile when signed in
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*, agencies(name)')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!profileError && profile) {
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: profile.name || '',
+            role: profile.role as UserRole,
+            agencyId: profile.agency_id || undefined,
+            agencyName: profile.agencies ? profile.agencies.name : undefined
+          };
+          
+          setUser(userData);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
     checkAuth();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // This would be an API call in a real app
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // Mock user data based on email
-      let mockUser: User;
+      if (error) throw error;
       
-      if (email === 'admin@motopay.com') {
-        mockUser = {
-          id: '1',
-          name: 'مشرف النظام',
-          email: 'admin@motopay.com',
-          role: 'super-admin'
-        };
-      } else if (email === 'agency@motopay.com') {
-        mockUser = {
-          id: '2',
-          name: 'أحمد محمد',
-          email: 'agency@motopay.com',
-          role: 'agency',
-          agencyId: 'a1',
-          agencyName: 'الفارس للدراجات'
-        };
-      } else {
-        throw new Error('بيانات الدخول غير صحيحة');
-      }
-      
-      setUser(mockUser);
-      localStorage.setItem('motoUser', JSON.stringify(mockUser));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(error.message || 'بيانات الدخول غير صحيحة');
     } finally {
       setIsLoading(false);
     }
@@ -95,32 +133,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (agencyName: string, name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      // This would be an API call in a real app
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo, we're not actually creating a new user
-      const mockUser: User = {
-        id: Date.now().toString(),
-        name,
+      // Register user
+      const { data: { user: authUser }, error: signUpError } = await supabase.auth.signUp({
         email,
-        role: 'agency',
-        agencyId: `a${Date.now()}`,
-        agencyName
-      };
+        password,
+        options: {
+          data: {
+            name,
+            role: 'agency'
+          }
+        }
+      });
       
-      setUser(mockUser);
-      localStorage.setItem('motoUser', JSON.stringify(mockUser));
-    } catch (error) {
+      if (signUpError) throw signUpError;
+      
+      if (authUser) {
+        // Create agency
+        const { data: agency, error: agencyError } = await supabase
+          .from('agencies')
+          .insert({
+            name: agencyName,
+            owner_id: authUser.id,
+            subscription_status: 'active',
+            subscription_ends: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+          })
+          .select()
+          .single();
+        
+        if (agencyError) throw agencyError;
+        
+        // Update profile with agency_id
+        if (agency) {
+          const { error: profileUpdateError } = await supabase
+            .from('profiles')
+            .update({ 
+              agency_id: agency.id 
+            })
+            .eq('id', authUser.id);
+          
+          if (profileUpdateError) throw profileUpdateError;
+          
+          // Create default settings for agency
+          const { error: settingsError } = await supabase
+            .from('settings')
+            .insert({
+              agency_id: agency.id
+            });
+          
+          if (settingsError) throw settingsError;
+        }
+      }
+    } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
+      throw new Error(error.message || 'حدث خطأ أثناء إنشاء حسابك');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('motoUser');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const value = {

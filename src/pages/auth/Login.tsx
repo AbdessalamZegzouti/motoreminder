@@ -40,12 +40,12 @@ const Login = () => {
       });
       // Navigate to dashboard or original destination
       navigate(from, { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "فشل تسجيل الدخول",
-        description: "بيانات الدخول غير صحيحة",
+        description: error.message || "بيانات الدخول غير صحيحة",
       });
     } finally {
       setIsLoading(false);
@@ -101,9 +101,7 @@ const Login = () => {
 
       <div className="mt-8 text-center text-sm text-muted-foreground">
         <div className="flex flex-col gap-1 border-t pt-4">
-          <p>للتجربة يمكنك استخدام:</p>
-          <p>وكالة: agency@motopay.com / password</p>
-          <p>مشرف: admin@motopay.com / password</p>
+          <p>يمكنك تسجيل حساب جديد والبدء في استخدام النظام</p>
         </div>
       </div>
     </AuthLayout>

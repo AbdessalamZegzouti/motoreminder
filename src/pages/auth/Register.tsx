@@ -38,14 +38,14 @@ const Register = () => {
       await register(agencyName, name, email, password);
       toast({
         title: "تم إنشاء الحساب بنجاح",
-        description: "سيتم مراجعة طلبك من قبل المشرف",
+        description: "تم تسجيل الدخول تلقائياً",
       });
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "فشل إنشاء الحساب",
-        description: "حدث خطأ أثناء إنشاء حسابك",
+        description: error.message || "حدث خطأ أثناء إنشاء حسابك",
       });
     } finally {
       setIsLoading(false);

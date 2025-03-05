@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Save, Copy, RotateCcw } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WhatsAppMessageTemplateProps {
   template: string;
@@ -18,6 +20,34 @@ const WhatsAppMessageTemplate: React.FC<WhatsAppMessageTemplateProps> = ({
   template,
   onTemplateChange
 }) => {
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load template from database on component mount
+  useEffect(() => {
+    const loadTemplate = async () => {
+      if (user?.agencyId) {
+        try {
+          const { data, error } = await supabase
+            .from('settings')
+            .select('whatsapp_template')
+            .eq('agency_id', user.agencyId)
+            .single();
+          
+          if (error) throw error;
+          
+          if (data && data.whatsapp_template) {
+            onTemplateChange(data.whatsapp_template);
+          }
+        } catch (error) {
+          console.error('Error loading template:', error);
+        }
+      }
+    };
+
+    loadTemplate();
+  }, [user?.agencyId, onTemplateChange]);
+
   const handleResetTemplate = () => {
     onTemplateChange(DEFAULT_TEMPLATE);
     toast({
@@ -26,13 +56,62 @@ const WhatsAppMessageTemplate: React.FC<WhatsAppMessageTemplateProps> = ({
     });
   };
 
-  const handleSaveTemplate = () => {
-    // Here you would typically save to a database
-    // For now, we'll just show a toast notification
-    toast({
-      title: "تم حفظ القالب",
-      description: "تم حفظ قالب الرسالة بنجاح",
-    });
+  const handleSaveTemplate = async () => {
+    if (!user?.agencyId) {
+      toast({
+        title: "خطأ",
+        description: "يجب تسجيل الدخول لحفظ القالب",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      // Check if settings exist for agency
+      const { data: existingSettings, error: checkError } = await supabase
+        .from('settings')
+        .select('id')
+        .eq('agency_id', user.agencyId)
+        .maybeSingle();
+        
+      if (checkError) throw checkError;
+      
+      if (existingSettings) {
+        // Update existing settings
+        const { error: updateError } = await supabase
+          .from('settings')
+          .update({ whatsapp_template: template })
+          .eq('agency_id', user.agencyId);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Create new settings
+        const { error: insertError } = await supabase
+          .from('settings')
+          .insert({ 
+            agency_id: user.agencyId,
+            whatsapp_template: template 
+          });
+          
+        if (insertError) throw insertError;
+      }
+      
+      toast({
+        title: "تم حفظ القالب",
+        description: "تم حفظ قالب الرسالة بنجاح",
+      });
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "خطأ في الحفظ",
+        description: "حدث خطأ أثناء حفظ القالب",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCopyTemplate = () => {
@@ -134,9 +213,9 @@ const WhatsAppMessageTemplate: React.FC<WhatsAppMessageTemplateProps> = ({
             نسخ
           </Button>
         </div>
-        <Button onClick={handleSaveTemplate} className="gap-1">
+        <Button onClick={handleSaveTemplate} disabled={isSaving} className="gap-1">
           <Save className="h-4 w-4" />
-          حفظ القالب
+          {isSaving ? "جاري الحفظ..." : "حفظ القالب"}
         </Button>
       </CardFooter>
     </Card>
