@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log("Session found, fetching profile data");
           
           try {
-            // Use the security definer function to avoid recursion
+            // Fetch profile using the security definer function to avoid recursion
             const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('*, agencies(name)')

@@ -271,6 +271,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_agency_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
