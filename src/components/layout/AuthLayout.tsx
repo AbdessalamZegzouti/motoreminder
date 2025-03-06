@@ -13,7 +13,7 @@ const AuthLayout = ({
   children, 
   image = "/auth-bg.jpg", 
   title = "موتوبي", 
-  description = "منصة إدارة مدفوعات العملاء لوكالات الدراجات" 
+  description = "منصة إدارة مدفوعات العملاء لوكالات الدراجات بالدرهم المغربي" 
 }: AuthLayoutProps) => {
   return (
     <div className="flex min-h-screen bg-background">
@@ -47,7 +47,7 @@ const AuthLayout = ({
           <blockquote className="space-y-4">
             <div className="h-10 w-2 bg-primary mr-4 mb-2 rounded-full"></div>
             <p className="text-xl font-medium">
-              "منصة موتوبي ساعدت وكالتنا على متابعة مدفوعات العملاء بكل سهولة ويسر."
+              "منصة موتوبي ساعدت وكالتنا على متابعة مدفوعات العملاء بالدرهم المغربي بكل سهولة ويسر."
             </p>
             <footer className="text-base mt-2 opacity-90">أحمد السالم - وكالة الصفوة للدراجات</footer>
           </blockquote>

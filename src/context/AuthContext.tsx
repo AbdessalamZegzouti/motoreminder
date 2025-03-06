@@ -52,28 +52,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session) {
           console.log("Session found, fetching profile data");
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*, agencies(name)')
-            .eq('id', session.user.id)
-            .single();
           
-          if (profileError) {
-            console.error("Profile fetch error:", profileError);
-            throw profileError;
+          try {
+            // Use the security definer function to avoid recursion
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*, agencies(name)')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (profileError) {
+              console.error("Profile fetch error:", profileError);
+              throw profileError;
+            }
+            
+            if (profile) {
+              const userData: User = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: profile.name || '',
+                role: profile.role as UserRole,
+                agencyId: profile.agency_id || undefined,
+                agencyName: profile.agencies ? profile.agencies.name : undefined
+              };
+              
+              console.log("User data loaded successfully:", userData);
+              setUser(userData);
+            } else {
+              console.error("No profile found for user");
+              setUser(null);
+            }
+          } catch (error) {
+            console.error("Error in profile fetching:", error);
+            setUser(null);
           }
-          
-          const userData: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            name: profile.name || '',
-            role: profile.role as UserRole,
-            agencyId: profile.agency_id || undefined,
-            agencyName: profile.agencies ? profile.agencies.name : undefined
-          };
-          
-          console.log("User data loaded:", userData);
-          setUser(userData);
         } else {
           console.log("No active session found");
           setUser(null);
@@ -91,26 +103,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN' && session) {
         console.log("User signed in, fetching profile data");
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*, agencies(name)')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (!profileError && profile) {
-          const userData: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            name: profile.name || '',
-            role: profile.role as UserRole,
-            agencyId: profile.agency_id || undefined,
-            agencyName: profile.agencies ? profile.agencies.name : undefined
-          };
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*, agencies(name)')
+            .eq('id', session.user.id)
+            .single();
           
-          console.log("User profile loaded after sign-in:", userData);
-          setUser(userData);
-        } else {
-          console.error("Error fetching profile after sign-in:", profileError);
+          if (!profileError && profile) {
+            const userData: User = {
+              id: session.user.id,
+              email: session.user.email || '',
+              name: profile.name || '',
+              role: profile.role as UserRole,
+              agencyId: profile.agency_id || undefined,
+              agencyName: profile.agencies ? profile.agencies.name : undefined
+            };
+            
+            console.log("User profile loaded after sign-in:", userData);
+            setUser(userData);
+          } else {
+            console.error("Error fetching profile after sign-in:", profileError);
+            setUser(null);
+          }
+        } catch (error) {
+          console.error("Error loading profile after sign-in:", error);
+          setUser(null);
         }
       } else if (event === 'SIGNED_OUT') {
         console.log("User signed out, clearing user data");
@@ -128,12 +146,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log("Attempting login with:", email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) throw error;
+      console.log("Login successful");
       
     } catch (error: any) {
       console.error('Login error:', error);
@@ -147,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       // Step 1: Create the user account
+      console.log("Creating user with email:", email);
       const { data: { user: authUser }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -197,17 +218,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               
               console.log("Profile updated successfully with agency ID");
               
-              // Step 4: Create settings record for the agency
+              // Step 4: Create settings record for the agency with MAD as currency
               try {
                 const { error: settingsError } = await supabase
                   .from('settings')
                   .insert({
-                    agency_id: agency.id
+                    agency_id: agency.id,
+                    currency: 'MAD' // Set Moroccan Dirham as the default currency
                   });
                 
                 if (settingsError) throw settingsError;
                 
-                console.log("Settings created successfully for the agency");
+                console.log("Settings created successfully for the agency with MAD currency");
               } catch (settingsError: any) {
                 console.error('Settings creation error:', settingsError);
                 throw new Error(settingsError.message || 'حدث خطأ أثناء إنشاء الإعدادات');
@@ -222,6 +244,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error(agencyError.message || 'حدث خطأ أثناء إنشاء الوكالة');
         }
       }
+      
+      console.log("Registration completed successfully");
+      
     } catch (error: any) {
       console.error('Registration error:', error);
       throw new Error(error.message || 'حدث خطأ أثناء إنشاء حسابك');

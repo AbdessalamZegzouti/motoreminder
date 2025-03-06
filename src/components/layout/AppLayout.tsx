@@ -12,11 +12,12 @@ type AppLayoutProps = {
 };
 
 const AppLayout = ({ title = 'الرئيسية' }: AppLayoutProps) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const userRole = user?.role || 'agency';
   const [pageTitle, setPageTitle] = useState(title);
+  const [welcomeToastShown, setWelcomeToastShown] = useState(false);
 
   // Function to get page title based on pathname
   const getPageTitle = (pathname: string) => {
@@ -52,16 +53,46 @@ const AppLayout = ({ title = 'الرئيسية' }: AppLayoutProps) => {
 
   // Effect to redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    } else {
-      // Welcome toast when entering dashboard
-      toast({
-        title: `مرحباً بك ${user?.name}`,
-        description: "تم تسجيل الدخول بنجاح إلى لوحة التحكم",
-      });
+    console.log("AppLayout: Auth state check. isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+    
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        console.log("User not authenticated, redirecting to login");
+        navigate('/login', { state: { from: location } });
+      } else if (user && !welcomeToastShown) {
+        // Welcome toast when entering dashboard
+        toast({
+          title: `مرحباً بك ${user.name}`,
+          description: "تم تسجيل الدخول بنجاح إلى لوحة التحكم",
+        });
+        setWelcomeToastShown(true);
+      }
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [isAuthenticated, isLoading, navigate, location, user, welcomeToastShown]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated and still on this page, show minimal loading UI
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">جاري التحقق من حسابك...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background">

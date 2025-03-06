@@ -28,7 +28,9 @@ const Register = () => {
     console.log("Register: Authentication state changed. isAuthenticated:", isAuthenticated);
     if (isAuthenticated) {
       console.log("User is authenticated, redirecting to dashboard");
-      navigate('/dashboard', { replace: true });
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 500); // Small delay to ensure state is updated
     }
   }, [isAuthenticated, navigate]);
 
@@ -55,9 +57,8 @@ const Register = () => {
         description: "تم تسجيل الدخول تلقائياً",
       });
       
-      // Force navigate to dashboard after successful registration
-      console.log("Registration successful, navigating to dashboard");
-      navigate('/dashboard', { replace: true });
+      // Redirect will happen in useEffect when isAuthenticated changes
+      console.log("Registration successful, will be redirected via useEffect");
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
@@ -200,6 +201,10 @@ const Register = () => {
             <Link to="/login" className="text-primary font-medium hover:underline transition-colors">
               تسجيل الدخول
             </Link>
+          </div>
+          
+          <div className="mt-4 text-center text-sm text-muted-foreground border-t pt-4">
+            <p>العملة المعتمدة: درهم مغربي (MAD)</p>
           </div>
         </div>
       </form>

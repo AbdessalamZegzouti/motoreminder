@@ -27,7 +27,9 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log("User is authenticated, redirecting to:", from);
-      navigate(from, { replace: true });
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 500); // Small delay to ensure state is updated
     }
   }, [isAuthenticated, navigate, from]);
 
@@ -141,6 +143,7 @@ const Login = () => {
           
           <div className="mt-8 text-center text-sm text-muted-foreground border-t pt-6">
             <p>يمكنك تسجيل حساب جديد والبدء في استخدام النظام مباشرة</p>
+            <p className="mt-2">العملة المعتمدة: درهم مغربي (MAD)</p>
           </div>
         </div>
       </form>
