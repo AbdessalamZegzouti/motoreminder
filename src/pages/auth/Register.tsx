@@ -86,6 +86,7 @@ const Register = () => {
           <div className="space-y-2">
             <Label htmlFor="agencyName" className="text-base">اسم الوكالة</Label>
             <div className="relative">
+              <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="agencyName"
                 type="text"
@@ -93,15 +94,15 @@ const Register = () => {
                 value={agencyName}
                 onChange={(e) => setAgencyName(e.target.value)}
                 required
-                className="pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
               />
-              <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="name" className="text-base">اسم المدير</Label>
             <div className="relative">
+              <User className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="name"
                 type="text"
@@ -109,15 +110,15 @@ const Register = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
               />
-              <User className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="email" className="text-base">البريد الإلكتروني</Label>
             <div className="relative">
+              <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
@@ -125,15 +126,26 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="ltr text-left pl-10 pr-4 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                dir="ltr"
               />
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="password" className="text-base">كلمة المرور</Label>
             <div className="relative">
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPassword ? 
+                  <EyeOff className="h-5 w-5" /> : 
+                  <Eye className="h-5 w-5" />
+                }
+              </button>
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -141,24 +153,26 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="ltr text-left pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-4 pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                dir="ltr"
               />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? 
-                  <EyeOff className="h-5 w-5" /> : 
-                  <Eye className="h-5 w-5" />
-                }
-              </button>
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-base">تأكيد كلمة المرور</Label>
             <div className="relative">
+              <button 
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? 
+                  <EyeOff className="h-5 w-5" /> : 
+                  <Eye className="h-5 w-5" />
+                }
+              </button>
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
@@ -166,18 +180,9 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="ltr text-left pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-4 pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                dir="ltr"
               />
-              <button 
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showConfirmPassword ? 
-                  <EyeOff className="h-5 w-5" /> : 
-                  <Eye className="h-5 w-5" />
-                }
-              </button>
             </div>
           </div>
         </div>
@@ -189,8 +194,8 @@ const Register = () => {
         >
           {isLoading ? "جاري إنشاء الحساب..." : (
             <>
+              <UserPlus className="ml-2 h-4 w-4" />
               إنشاء حساب
-              <UserPlus className="mr-2 h-4 w-4" />
             </>
           )}
         </Button>
@@ -201,10 +206,6 @@ const Register = () => {
             <Link to="/login" className="text-primary font-medium hover:underline transition-colors">
               تسجيل الدخول
             </Link>
-          </div>
-          
-          <div className="mt-4 text-center text-sm text-muted-foreground border-t pt-4">
-            <p>العملة المعتمدة: درهم مغربي (MAD)</p>
           </div>
         </div>
       </form>

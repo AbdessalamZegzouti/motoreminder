@@ -31,6 +31,10 @@ const AuthLayout = ({
           )}>
             {children}
           </div>
+          
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p>العملة المعتمدة: درهم مغربي (MAD)</p>
+          </div>
         </div>
       </div>
       

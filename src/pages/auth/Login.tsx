@@ -76,6 +76,7 @@ const Login = () => {
           <div className="space-y-2">
             <Label htmlFor="email" className="text-base">البريد الإلكتروني</Label>
             <div className="relative">
+              <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
@@ -83,29 +84,20 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="ltr text-left pl-10 pr-4 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                className="text-right pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                dir="ltr"
               />
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </div>
           </div>
           
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-base">كلمة المرور</Label>
               <Link to="/forgot-password" className="text-sm text-primary hover:underline transition-colors">
                 نسيت كلمة المرور؟
               </Link>
+              <Label htmlFor="password" className="text-base">كلمة المرور</Label>
             </div>
             <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="ltr text-left pr-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
-              />
               <button 
                 type="button"
                 onClick={togglePasswordVisibility}
@@ -116,6 +108,16 @@ const Login = () => {
                   <Eye className="h-5 w-5" />
                 }
               </button>
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="text-right pr-4 pl-10 transition-all duration-200 border-input hover:border-primary focus:border-primary"
+                dir="ltr"
+              />
             </div>
           </div>
         </div>
@@ -127,8 +129,8 @@ const Login = () => {
         >
           {isLoading ? "جاري تسجيل الدخول..." : (
             <>
+              <LogIn className="ml-2 h-4 w-4" />
               تسجيل الدخول
-              <LogIn className="mr-2 h-4 w-4" />
             </>
           )}
         </Button>
@@ -139,11 +141,6 @@ const Login = () => {
             <Link to="/register" className="text-primary font-medium hover:underline transition-colors">
               سجل الآن
             </Link>
-          </div>
-          
-          <div className="mt-8 text-center text-sm text-muted-foreground border-t pt-6">
-            <p>يمكنك تسجيل حساب جديد والبدء في استخدام النظام مباشرة</p>
-            <p className="mt-2">العملة المعتمدة: درهم مغربي (MAD)</p>
           </div>
         </div>
       </form>
