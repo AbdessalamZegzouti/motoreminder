@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 import AuthLayout from '@/components/layout/AuthLayout';
@@ -10,7 +10,7 @@ import { User, Mail, Eye, EyeOff, UserPlus, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Register = () => {
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -22,6 +22,14 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("User is authenticated, redirecting to dashboard");
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,13 +46,17 @@ const Register = () => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting registration with:", email);
       await register(agencyName, name, email, password);
       toast({
         title: "تم إنشاء الحساب بنجاح",
         description: "تم تسجيل الدخول تلقائياً",
       });
-      navigate('/dashboard');
+      
+      // The redirect will be handled by the useEffect above
+      console.log("Registration successful, redirect will happen via useEffect");
     } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         variant: "destructive",
         title: "فشل إنشاء الحساب",

@@ -10,7 +10,7 @@ import { Eye, EyeOff, LogIn, Mail } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,22 +26,25 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      console.log("User is authenticated, redirecting to:", from);
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      console.log("Attempting login with:", email);
       await login(email, password);
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك في منصة موتوبي",
       });
-      // Navigate to dashboard or original destination
-      navigate(from, { replace: true });
+      
+      // The redirect will be handled by the useEffect above
+      console.log("Login successful, redirect will happen via useEffect");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({

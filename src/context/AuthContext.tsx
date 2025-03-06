@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -40,19 +41,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = async () => {
       try {
         setIsLoading(true);
+        console.log("Checking auth state...");
         
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
         
         if (session) {
+          console.log("Session found, fetching profile data");
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*, agencies(name)')
             .eq('id', session.user.id)
             .single();
           
-          if (profileError) throw profileError;
+          if (profileError) {
+            console.error("Profile fetch error:", profileError);
+            throw profileError;
+          }
           
           const userData: User = {
             id: session.user.id,
@@ -63,17 +72,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             agencyName: profile.agencies ? profile.agencies.name : undefined
           };
           
+          console.log("User data loaded:", userData);
           setUser(userData);
+        } else {
+          console.log("No active session found");
+          setUser(null);
         }
       } catch (error) {
         console.error('Authentication error:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
+        console.log("Auth check complete, isLoading set to false");
       }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN' && session) {
+        console.log("User signed in, fetching profile data");
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*, agencies(name)')
@@ -90,9 +107,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             agencyName: profile.agencies ? profile.agencies.name : undefined
           };
           
+          console.log("User profile loaded after sign-in:", userData);
           setUser(userData);
+        } else {
+          console.error("Error fetching profile after sign-in:", profileError);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out, clearing user data");
         setUser(null);
       }
     });
