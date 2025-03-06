@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.message || 'بيانات الدخول غير ��حيحة');
+      throw new Error(error.message || 'بيانات الدخول غير صحيحة');
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (agencyName: string, name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Step 1: Create the user account
       const { data: { user: authUser }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -160,38 +161,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (signUpError) throw signUpError;
       
       if (authUser) {
-        const subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        console.log("User created successfully, setting up agency");
+        // Calculate subscription end date (30 days from now)
+        const subscriptionEndDate = new Date();
+        subscriptionEndDate.setDate(subscriptionEndDate.getDate() + 30);
         
-        const { data: agency, error: agencyError } = await supabase
-          .from('agencies')
-          .insert({
-            name: agencyName,
-            owner_id: authUser.id,
-            subscription_status: 'active',
-            subscription_ends: subscriptionEndDate.toISOString()
-          })
-          .select()
-          .single();
-        
-        if (agencyError) throw agencyError;
-        
-        if (agency) {
-          const { error: profileUpdateError } = await supabase
-            .from('profiles')
-            .update({ 
-              agency_id: agency.id 
-            })
-            .eq('id', authUser.id);
-          
-          if (profileUpdateError) throw profileUpdateError;
-          
-          const { error: settingsError } = await supabase
-            .from('settings')
+        // Step 2: Create the agency record
+        try {
+          const { data: agency, error: agencyError } = await supabase
+            .from('agencies')
             .insert({
-              agency_id: agency.id
-            });
+              name: agencyName,
+              owner_id: authUser.id,
+              subscription_status: 'active',
+              subscription_ends: subscriptionEndDate.toISOString() // Convert Date to ISO string for Supabase
+            })
+            .select()
+            .single();
           
-          if (settingsError) throw settingsError;
+          if (agencyError) throw agencyError;
+          
+          console.log("Agency created successfully:", agency);
+          
+          // Step 3: Update the profile record with the agency ID
+          if (agency) {
+            try {
+              const { error: profileUpdateError } = await supabase
+                .from('profiles')
+                .update({ 
+                  agency_id: agency.id 
+                })
+                .eq('id', authUser.id);
+              
+              if (profileUpdateError) throw profileUpdateError;
+              
+              console.log("Profile updated successfully with agency ID");
+              
+              // Step 4: Create settings record for the agency
+              try {
+                const { error: settingsError } = await supabase
+                  .from('settings')
+                  .insert({
+                    agency_id: agency.id
+                  });
+                
+                if (settingsError) throw settingsError;
+                
+                console.log("Settings created successfully for the agency");
+              } catch (settingsError: any) {
+                console.error('Settings creation error:', settingsError);
+                throw new Error(settingsError.message || 'حدث خطأ أثناء إنشاء الإعدادات');
+              }
+            } catch (profileError: any) {
+              console.error('Profile update error:', profileError);
+              throw new Error(profileError.message || 'حدث خطأ أثناء تحديث الملف الشخصي');
+            }
+          }
+        } catch (agencyError: any) {
+          console.error('Agency creation error:', agencyError);
+          throw new Error(agencyError.message || 'حدث خطأ أثناء إنشاء الوكالة');
         }
       }
     } catch (error: any) {

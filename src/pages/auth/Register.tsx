@@ -10,7 +10,7 @@ import { User, Mail, Eye, EyeOff, UserPlus, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Register = () => {
-  const { register, isAuthenticated } = useAuth();
+  const { register, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -25,6 +25,7 @@ const Register = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
+    console.log("Register: Authentication state changed. isAuthenticated:", isAuthenticated);
     if (isAuthenticated) {
       console.log("User is authenticated, redirecting to dashboard");
       navigate('/dashboard', { replace: true });
@@ -48,13 +49,15 @@ const Register = () => {
     try {
       console.log("Attempting registration with:", email);
       await register(agencyName, name, email, password);
+      
       toast({
         title: "تم إنشاء الحساب بنجاح",
         description: "تم تسجيل الدخول تلقائياً",
       });
       
-      // The redirect will be handled by the useEffect above
-      console.log("Registration successful, redirect will happen via useEffect");
+      // Force navigate to dashboard after successful registration
+      console.log("Registration successful, navigating to dashboard");
+      navigate('/dashboard', { replace: true });
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
