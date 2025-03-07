@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -58,18 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // This uses the SECURITY DEFINER function we created
             const { data: profileData, error: profileError } = await supabase.rpc('get_current_user_profile');
             
-            if (!profileError && profileData) {
+            if (!profileError && profileData && profileData.length > 0) {
               console.log("Profile data retrieved:", profileData);
               
-              // Type assertion to ensure the correct type
-              const profileRow = profileData as {
-                id: string;
-                name: string;
-                email: string;
-                role: string;
-                agency_id: string | null;
-                agency_name: string | null;
-              };
+              // Get the first element from the array
+              const profileRow = profileData[0];
               
               const userData: User = {
                 id: profileRow.id,
@@ -122,18 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Try to get profile data using our secure RPC function
           const { data: profileData, error: profileError } = await supabase.rpc('get_current_user_profile');
           
-          if (!profileError && profileData) {
+          if (!profileError && profileData && profileData.length > 0) {
             console.log("Profile data retrieved after sign-in:", profileData);
             
-            // Type assertion for the correct handling
-            const profileRow = profileData as {
-              id: string;
-              name: string;
-              email: string;
-              role: string;
-              agency_id: string | null;
-              agency_name: string | null;
-            };
+            // Get the first element from the array
+            const profileRow = profileData[0];
             
             const userData: User = {
               id: profileRow.id,
