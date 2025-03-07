@@ -271,6 +271,29 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_user_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          email: string
+          role: string
+          agency_id: string
+          agency_name: string
+        }[]
+      }
+      get_profile_by_id: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          role: string
+          agency_id: string
+          agency_name: string
+        }[]
+      }
       get_user_agency_id: {
         Args: Record<PropertyKey, never>
         Returns: string

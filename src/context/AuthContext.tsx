@@ -37,66 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Function to fetch user profile data using the server function
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log("Fetching profile data for user:", userId);
-      
-      // Call a stored procedure/function instead of directly querying the profiles table
-      const { data, error } = await supabase.rpc('get_profile_by_id', { user_id: userId });
-      
-      if (error) {
-        console.error("Error fetching profile with RPC:", error);
-        throw error;
-      }
-      
-      if (!data) {
-        console.error("No profile found for user");
-        return null;
-      }
-      
-      console.log("Profile data retrieved successfully:", data);
-      return data;
-    } catch (error) {
-      console.error("Error in fetchUserProfile:", error);
-      return null;
-    }
-  };
-
-  // Alternative direct method if RPC fails
-  const fetchUserProfileDirect = async (userId: string) => {
-    try {
-      console.log("Trying direct profile fetch for user:", userId);
-      
-      // Use a service role key or direct query bypassing RLS
-      const { data, error } = await supabase.auth.admin.getUserById(userId);
-      
-      if (error) {
-        console.error("Direct profile fetch error:", error);
-        return null;
-      }
-      
-      if (!data || !data.user) {
-        console.error("No user found with direct method");
-        return null;
-      }
-      
-      // Get basic user data
-      const userData = {
-        id: data.user.id,
-        email: data.user.email || '',
-        name: data.user.user_metadata?.name || '',
-        role: (data.user.user_metadata?.role as UserRole) || 'agency',
-      };
-      
-      console.log("Basic user data retrieved with direct method:", userData);
-      return userData;
-    } catch (error) {
-      console.error("Error in direct profile fetch:", error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -113,50 +53,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session) {
           console.log("Session found, fetching profile data");
           
-          // First attempt: Try using our RPC function
+          // First attempt: Try using our custom RPC function
           try {
-            // Create an RPC function since we're having issues with the profiles table
-            const { data: rpcData, error: rpcError } = await supabase.rpc('get_current_user_profile');
+            // This uses the SECURITY DEFINER function we created
+            const { data: profileData, error: profileError } = await supabase.rpc('get_current_user_profile');
             
-            if (!rpcError && rpcData) {
+            if (!profileError && profileData) {
+              console.log("Profile data retrieved:", profileData);
+              
+              // Type assertion to ensure the correct type
+              const profileRow = profileData as {
+                id: string;
+                name: string;
+                email: string;
+                role: string;
+                agency_id: string | null;
+                agency_name: string | null;
+              };
+              
               const userData: User = {
-                id: session.user.id,
-                email: session.user.email || '',
-                name: rpcData.name || '',
-                role: rpcData.role as UserRole,
-                agencyId: rpcData.agency_id || undefined,
-                agencyName: rpcData.agency_name || undefined
+                id: profileRow.id,
+                email: profileRow.email || session.user.email || '',
+                name: profileRow.name || '',
+                role: profileRow.role as UserRole,
+                agencyId: profileRow.agency_id || undefined,
+                agencyName: profileRow.agency_name || undefined
               };
               
               console.log("User data loaded successfully via RPC:", userData);
               setUser(userData);
             } else {
-              console.error("RPC fetch error:", rpcError);
-              
-              // Fallback to user metadata from the session
-              const userData: User = {
-                id: session.user.id,
-                email: session.user.email || '',
-                name: session.user.user_metadata?.name || '',
-                role: (session.user.user_metadata?.role as UserRole) || 'agency',
-                // Agency data will be missing in this fallback
-              };
-              
-              console.log("Using fallback user data from session:", userData);
-              setUser(userData);
+              console.error("RPC fetch error:", profileError);
+              throw new Error("Failed to fetch user profile");
             }
           } catch (error) {
             console.error("Error in profile fetching:", error);
             
-            // Ultimate fallback - just use what we have in the session
+            // Fallback to user metadata from the session
             const userData: User = {
               id: session.user.id,
               email: session.user.email || '',
               name: session.user.user_metadata?.name || '',
               role: (session.user.user_metadata?.role as UserRole) || 'agency',
+              // Agency data will be missing in this fallback
             };
             
-            console.log("Using ultimate fallback user data:", userData);
+            console.log("Using fallback user data from session:", userData);
             setUser(userData);
           }
         } else {
@@ -177,23 +119,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (event === 'SIGNED_IN' && session) {
         console.log("User signed in, fetching profile data");
         try {
-          // Similar approach as above - try RPC first, then fallback
-          const { data: rpcData, error: rpcError } = await supabase.rpc('get_current_user_profile');
+          // Try to get profile data using our secure RPC function
+          const { data: profileData, error: profileError } = await supabase.rpc('get_current_user_profile');
           
-          if (!rpcError && rpcData) {
+          if (!profileError && profileData) {
+            console.log("Profile data retrieved after sign-in:", profileData);
+            
+            // Type assertion for the correct handling
+            const profileRow = profileData as {
+              id: string;
+              name: string;
+              email: string;
+              role: string;
+              agency_id: string | null;
+              agency_name: string | null;
+            };
+            
             const userData: User = {
-              id: session.user.id,
-              email: session.user.email || '',
-              name: rpcData.name || '',
-              role: rpcData.role as UserRole,
-              agencyId: rpcData.agency_id || undefined,
-              agencyName: rpcData.agency_name || undefined
+              id: profileRow.id,
+              email: profileRow.email || session.user.email || '',
+              name: profileRow.name || '',
+              role: profileRow.role as UserRole,
+              agencyId: profileRow.agency_id || undefined,
+              agencyName: profileRow.agency_name || undefined
             };
             
             console.log("User profile loaded after sign-in via RPC:", userData);
             setUser(userData);
           } else {
             // Fallback to metadata
+            console.error("RPC fetch error after sign-in:", profileError);
             const userData: User = {
               id: session.user.id,
               email: session.user.email || '',
